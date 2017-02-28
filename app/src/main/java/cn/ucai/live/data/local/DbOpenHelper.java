@@ -1,0 +1,75 @@
+package cn.ucai.live.data.local;
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+/**
+ * Created by Administrator on 2017/2/28.
+ */
+
+public class DbOpenHelper extends SQLiteOpenHelper {
+    private static final int DATABASE_VERSION = 1;
+    private static DbOpenHelper instance;
+
+    private static final String USERNAME_TABLE_CREATE = "CREATE TABLE "
+            + UserDao.TABLE_NAME + " ("
+            + UserDao.COLUMN_NAME_NICK + " TEXT, "
+            + UserDao.COLUMN_NAME_AVATAR + " TEXT, "
+            + UserDao.COLUMN_NAME_ID + " TEXT PRIMARY KEY);";
+
+    private static final String CREATE_PREF_TABLE = "CREATE TABLE "
+            + UserDao.PREF_TABLE_NAME + " ("
+            + UserDao.COLUMN_NAME_DISABLED_GROUPS + " TEXT, "
+            + UserDao.COLUMN_NAME_DISABLED_IDS + " TEXT);";
+
+    private static final String USER_TABLE_CREATE = "CREATE TABLE "
+            + UserDao.USER_TABLE_NAME + " ("
+            + UserDao.USER_COLUMN_NAME + " TEXT PRIMARY KEY, "
+            + UserDao.USER_COLUMN_NAME_NICK + " TEXT, "
+            + UserDao.USER_COLUMN_NAME_AVATAR_ID + " INTEGER, "
+            + UserDao.USER_COLUMN_NAME_AVATAR_NAME + " TEXT,"
+            + UserDao.USER_COLUMN_NAME_AVATAR_SUFFIX + " TEXT,"
+            + UserDao.USER_COLUMN_NAME_AVATAR_PATH + " TEXT,"
+            + UserDao.USER_COLUMN_NAME_AVATAR_TYPE + " INTEGER,"
+            + UserDao.USER_COLUMN_NAME_AVATAR_UPDATE_TIME + " TEXT);";
+
+    private DbOpenHelper(Context context) {
+        super(context, getUserDatabaseName(), null, DATABASE_VERSION);
+    }
+
+    public static DbOpenHelper getInstance(Context context) {
+        if (instance == null) {
+            instance = new DbOpenHelper(context.getApplicationContext());
+        }
+        return instance;
+    }
+
+    private static String getUserDatabaseName() {
+        return "";//SuperWeChatHelper.getInstance().getCurrentUsernName() + "_demo.db";
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        db.execSQL(USERNAME_TABLE_CREATE);
+        db.execSQL(CREATE_PREF_TABLE);
+        db.execSQL(USER_TABLE_CREATE);
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    }
+
+    public void closeDB() {
+        if (instance != null) {
+            try {
+                SQLiteDatabase db = instance.getWritableDatabase();
+                db.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            instance = null;
+        }
+    }
+
+}
