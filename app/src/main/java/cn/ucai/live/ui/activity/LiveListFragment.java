@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -65,6 +66,8 @@ public class LiveListFragment extends Fragment {
 
     View footView;
     RecyclerView recyclerView;
+    SwipeRefreshLayout mSrl;
+    TextView tvHint;
     GridLayoutManager manager;
 
     @Override
@@ -83,6 +86,8 @@ public class LiveListFragment extends Fragment {
         rooms = new ArrayList<EMChatRoom>();
         //adapter = new LiveAdapter(getContext(), getLiveRoomList(chatRoomList));
 
+        mSrl = (SwipeRefreshLayout) getView().findViewById(R.id.srl);
+        tvHint = (TextView) getView().findViewById(R.id.tvHint);
         recyclerView = (RecyclerView) getView().findViewById(R.id.recycleview);
         //footView = getView().inflate(R.layout.em_listview_footer_view, recyclerView, false);
 //        GridLayoutManager glm = (GridLayoutManager) recyclerView.getLayoutManager();
@@ -90,19 +95,37 @@ public class LiveListFragment extends Fragment {
         recyclerView.setLayoutManager(manager);
         recyclerView.setHasFixedSize(true);
         recyclerView.addItemDecoration(new GridMarginDecoration(6));
-        //recyclerView.setAdapter(adapter);
+//        recyclerView.setAdapter(adapter);
 
-//        footLoadingLayout = (LinearLayout) footView.findViewById(R.id.loading_layout);
-//        footLoadingPB = (ProgressBar) footView.findViewById(R.id.loading_bar);
-//        footLoadingText = (TextView) footView.findViewById(R.id.loading_text);
+        footLoadingLayout = (LinearLayout) getView().findViewById(R.id.loading_layout);
+        footLoadingPB = (ProgressBar) getView().findViewById(R.id.loading_bar);
+        footLoadingText = (TextView) getView().findViewById(R.id.loading_text);
 //        listView.addFooterView(footView, null, false);
-//        footLoadingLayout.setVisibility(View.GONE);
+        footLoadingLayout.setVisibility(View.GONE);
 
         loadAndShowData();
         setListener();
     }
 
     private void setListener() {
+        setChatRoomChangeListener();
+        setPullDownListener();
+        setPullUpListener();
+    }
+
+    private void setPullDownListener() {
+        mSrl.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mSrl.setRefreshing(true);
+                tvHint.setVisibility(View.VISIBLE);
+                cursor = null;
+                loadAndShowData();
+            }
+        });
+    }
+
+    private void setChatRoomChangeListener() {
         EMClient.getInstance().chatroomManager().addChatRoomChangeListener(new EMChatRoomChangeListener() {
             @Override
             public void onChatRoomDestroyed(String roomId, String roomName) {
@@ -137,7 +160,6 @@ public class LiveListFragment extends Fragment {
 
             }
         });
-        setPullUpListener();
     }
 
     private void setPullUpListener() {
@@ -156,6 +178,8 @@ public class LiveListFragment extends Fragment {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+                int firstPosition = manager.findFirstVisibleItemPosition();
+                mSrl.setEnabled(firstPosition == 0);
             }
         });
     }
@@ -174,11 +198,13 @@ public class LiveListFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
 
                         public void run() {
+                            mSrl.setRefreshing(false);
+                            tvHint.setVisibility(View.GONE);
                             chatRoomList.addAll(chatRooms);
                             if (chatRooms.size() != 0) {
                                 cursor = result.getCursor();
-//                                if (chatRooms.size() == pagesize)
-//                                    footLoadingLayout.setVisibility(View.VISIBLE);
+                                if (chatRooms.size() == pagesize)
+                                    footLoadingLayout.setVisibility(View.VISIBLE);
                             }
                             if (isFirstLoading) {
                                 //pb.setVisibility(View.INVISIBLE);
@@ -188,10 +214,11 @@ public class LiveListFragment extends Fragment {
 //                                rooms.addAll(chatRooms);
                             } else {
                                 if (chatRooms.size() < pagesize) {
+                                    Log.e(TAG, "chatRooms=" + chatRooms.size() + "pagesize=" + pagesize);
                                     hasMoreData = false;
-//                                    footLoadingLayout.setVisibility(View.VISIBLE);
-//                                    footLoadingPB.setVisibility(View.GONE);
-//                                    footLoadingText.setText("No more data");
+                                    footLoadingLayout.setVisibility(View.VISIBLE);
+                                    footLoadingPB.setVisibility(View.GONE);
+                                    footLoadingText.setText("No more data");
                                 }
                                 adapter.notifyDataSetChanged();
                             }
@@ -203,7 +230,9 @@ public class LiveListFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         public void run() {
                             isLoading = false;
-                            pb.setVisibility(View.INVISIBLE);
+                            mSrl.setRefreshing(false);
+                            tvHint.setVisibility(View.GONE);
+//                            pb.setVisibility(View.INVISIBLE);
                             footLoadingLayout.setVisibility(View.GONE);
                             Toast.makeText(getActivity(), "load failed, please check your network or try it later", Toast.LENGTH_SHORT).show();
                         }
