@@ -5,6 +5,7 @@ import android.util.Log;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
@@ -20,13 +21,13 @@ import cn.ucai.live.data.model.Result;
  * Created by clawpo on 2016/9/21.
  */
 public class ResultUtils {
-    public static <T> Result getResultFromJson(String jsonStr, Class<T> clazz){
+    public static <T> Result getResultFromJson(String jsonStr, Class<T> clazz) {
         Result result = new Result();
         try {
             JSONObject jsonObject = new JSONObject(jsonStr);
             result.setRetCode(jsonObject.getInt("retCode"));
             result.setRetMsg(jsonObject.getBoolean("retMsg"));
-            if(!jsonObject.isNull("retData")) {
+            if (!jsonObject.isNull("retData")) {
                 JSONObject jsonRetData = jsonObject.getJSONObject("retData");
                 if (jsonRetData != null) {
                     Log.e("Utils", "jsonRetData=" + jsonRetData);
@@ -47,20 +48,20 @@ public class ResultUtils {
                 }
             }
             return result;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return  null;
+        return null;
     }
 
-    public static <T> Result getListResultFromJson(String jsonStr, Class<T> clazz){
+    public static <T> Result getListResultFromJson(String jsonStr, Class<T> clazz) {
         Result result = new Result();
-        Log.e("Utils","jsonStr="+jsonStr);
+        Log.e("Utils", "jsonStr=" + jsonStr);
         try {
             JSONObject jsonObject = new JSONObject(jsonStr);
             result.setRetCode(jsonObject.getInt("retCode"));
             result.setRetMsg(jsonObject.getBoolean("retMsg"));
-            if(!jsonObject.isNull("retData")) {
+            if (!jsonObject.isNull("retData")) {
                 JSONArray array = jsonObject.getJSONArray("retData");
                 if (array != null) {
                     List<T> list = new ArrayList<T>();
@@ -74,19 +75,35 @@ public class ResultUtils {
                 }
             }
             return result;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return  null;
+        return null;
     }
 
-    public static <T> Result getPageResultFromJson(String jsonStr,Class<T> clazz){
+    public static String getEMResultFromJson(String jsonStr) {
+        try {
+            JSONObject jsonObject = new JSONObject(jsonStr);
+            if (!jsonObject.isNull("data")) {
+                JSONObject data = jsonObject.getJSONObject("data");
+                if (!data.isNull("data")) {
+                    String id = data.getString("id");
+                    return id;
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static <T> Result getPageResultFromJson(String jsonStr, Class<T> clazz) {
         Result result = new Result();
         try {
             JSONObject jsonObject = new JSONObject(jsonStr);
             result.setRetCode(jsonObject.getInt("retCode"));
             result.setRetMsg(jsonObject.getBoolean("retMsg"));
-            if(!jsonObject.isNull("retData")) {
+            if (!jsonObject.isNull("retData")) {
                 JSONObject jsonPager = jsonObject.getJSONObject("retData");
                 if (jsonPager != null) {
 //                    Pager pager = new Pager();
@@ -105,9 +122,9 @@ public class ResultUtils {
                 }
             }
             return result;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return  null;
+        return null;
     }
 }

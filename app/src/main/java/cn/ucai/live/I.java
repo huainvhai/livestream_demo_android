@@ -283,6 +283,10 @@ public interface I {
      * 客户端发送的分页下载附近的人的请求
      */
     String REQUEST_DOWNLOAD_LOCATION = "downloadLocation";
+    /**
+     * 客户端发送的开始直播的请求
+     */
+    String REQUEST_CREATE_CHATROOM = "createChatRoom";
 
     String BACK_MAIN_FROM_CHAT = "back_main_from_chat";
 
