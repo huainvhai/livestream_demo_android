@@ -8,12 +8,12 @@ import android.widget.RelativeLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import cn.ucai.live.R;
+import com.hyphenate.easeui.utils.EaseUserUtils;
 import com.hyphenate.easeui.widget.EaseImageView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import cn.ucai.live.R;
 
 /**
  * Created by wei on 2016/6/7.
@@ -47,15 +47,15 @@ public class LiveLeftGiftView extends RelativeLayout {
         ButterKnife.bind(this);
     }
 
-    public void setName(String name){
-        this.name.setText(name);
+    public void setName(String usernick) {
+        this.name.setText(usernick);
     }
 
-    public void setAvatar(String avatar){
-        Glide.with(getContext()).load(avatar).into(this.avatar);
+    public void setAvatar(String username) {
+        EaseUserUtils.setAppUserAvatar(getContext(), username, this.avatar);
     }
 
-    public ImageView getGiftImageView(){
+    public ImageView getGiftImageView() {
         return giftImage;
     }
 }

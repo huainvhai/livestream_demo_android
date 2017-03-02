@@ -41,6 +41,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.ucai.live.NetDao;
 import cn.ucai.live.R;
+import cn.ucai.live.data.model.LiveRoom;
 import cn.ucai.live.data.model.LiveSettings;
 import cn.ucai.live.utils.CommonUtils;
 import cn.ucai.live.utils.Log2FileUtil;
@@ -110,11 +111,11 @@ public class StartLiveActivity extends LiveBaseActivity
         EaseUserUtils.setAppUserAvatar(this, EMClient.getInstance().getCurrentUser(), userAvatar);
         EaseUserUtils.setAppUserNick(EMClient.getInstance().getCurrentUser(), usernameView);
         //usernameView.setText(anchorId);
-        String id = getIntent().getStringExtra("liveId");
-        Log.e(TAG, "getIntent,id=" + id);
-        if (id != null && !id.equals("")) {
-            liveId = id;
-            chatroomId = id;
+        LiveRoom room = getIntent().getParcelableExtra("liveroom");
+        Log.e(TAG, "getIntent,room=" + room);
+        if (room != null ) {
+            liveId = room.getId();
+            chatroomId = room.getChatroomId();
         } else {
             liveId = EMClient.getInstance().getCurrentUser();
 //            pd = new ProgressDialog(this);
