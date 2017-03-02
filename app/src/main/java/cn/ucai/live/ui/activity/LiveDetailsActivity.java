@@ -50,7 +50,7 @@ public class LiveDetailsActivity extends LiveBaseActivity implements UVideoView.
         liveId = liveRoom.getId();
         chatroomId = liveRoom.getChatroomId();
         //String coverRes = liveRoom.getCover();
-        EaseUserUtils.setAppUserAvatar(this,EMClient.getInstance().getCurrentUser(),coverView);
+        EaseUserUtils.setAppUserAvatar(this,liveRoom.getAnchorId(),coverView);
 
         anchorId = liveRoom.getAnchorId();
         usernameView.setText(anchorId);

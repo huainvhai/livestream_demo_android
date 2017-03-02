@@ -32,6 +32,8 @@ import com.ucloud.live.UEasyStreaming;
 import com.ucloud.live.UStreamingProfile;
 import com.ucloud.live.widget.UAspectFrameLayout;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
 import butterknife.BindView;
@@ -86,6 +88,7 @@ public class StartLiveActivity extends LiveBaseActivity
 
     boolean isStarted;
     ProgressDialog pd;
+    long startTime;
 
     private Handler handler = new Handler() {
         @Override
@@ -160,6 +163,8 @@ public class StartLiveActivity extends LiveBaseActivity
                 Toast.makeText(this, event.toString(), Toast.LENGTH_LONG).show();
                 break;
             case UEasyStreaming.State.START_RECORDING:
+                startTime = System.currentTimeMillis();
+                Log.e(TAG, "startTime=" + startTime);
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -207,7 +212,7 @@ public class StartLiveActivity extends LiveBaseActivity
     @OnClick(R.id.btn_start)
     void startLive() {
         //demo为了测试方便，只有指定的账号才能开启直播
-        Log.e(TAG, "startLive,id=" + liveId);
+        Log.e(TAG, "startLive,id=" + liveId + ",chatroomId=" + chatroomId);
         if (chatroomId == null || chatroomId.equals("")) {
             pd = new ProgressDialog(this);
             pd.setTitle("创建直播");
@@ -253,10 +258,11 @@ public class StartLiveActivity extends LiveBaseActivity
                     if (s != null) {
                         String id = ResultUtils.getEMResultFromJson(s);
                         Log.e(TAG, "createLive,id=" + id);
-                        isSuccess = true;
-                        //initLive(id);
-                        chatroomId = id;
-                        startLiveByChatRoom();
+                        if (id != null) {
+                            isSuccess = true;
+                            chatroomId = id;
+                            startLiveByChatRoom();
+                        }
                     }
                     if (!isSuccess) {
                         pd.dismiss();
@@ -270,14 +276,12 @@ public class StartLiveActivity extends LiveBaseActivity
                     CommonUtils.showShortToast("创建直播失败" + error);
                 }
             });
+        } else {
+            pd.dismiss();
+            CommonUtils.showShortToast("创建直播失败");
         }
     }
 
-    private void initLive(String id) {
-        liveId = id;
-        chatroomId = id;
-        initEnv();
-    }
 
     /**
      * 关闭直播显示直播成果
@@ -289,7 +293,27 @@ public class StartLiveActivity extends LiveBaseActivity
             finish();
             return;
         }
-        showConfirmCloseLayout();
+        long endTime = System.currentTimeMillis();
+        long time = endTime - startTime - 8 * 60 * 60 * 1000;
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:MM:SS");
+        String s = sdf.format(new Date(time));
+        Log.e(TAG, "直播时间=" + s);
+        removeLive();
+        showConfirmCloseLayout(s);
+    }
+
+    private void removeLive() {
+        NetDao.deleteLive(this, chatroomId, new OnCompleteListener<String>() {
+            @Override
+            public void onSuccess(String result) {
+                Log.e(TAG, "deleteLive,result=" + result);
+            }
+
+            @Override
+            public void onError(String error) {
+
+            }
+        });
     }
 
 
@@ -305,7 +329,7 @@ public class StartLiveActivity extends LiveBaseActivity
         }
     }
 
-    private void showConfirmCloseLayout() {
+    private void showConfirmCloseLayout(String time) {
         //显示封面
         coverImage.setVisibility(View.VISIBLE);
         EaseUserUtils.setAppUserAvatar(this, EMClient.getInstance().getCurrentUser(), coverImage);
@@ -317,8 +341,12 @@ public class StartLiveActivity extends LiveBaseActivity
 //        }
         View view = liveEndLayout.inflate();
         Button closeConfirmBtn = (Button) view.findViewById(R.id.live_close_confirm);
-        TextView usernameView = (TextView) view.findViewById(R.id.tv_username);
-        usernameView.setText(EMClient.getInstance().getCurrentUser());
+        TextView nameView = (TextView) view.findViewById(R.id.finish_tv_username);
+        EaseImageView userAvatar = (EaseImageView) view.findViewById(R.id.finish_iv_avatar);
+        TextView showTimeView = (TextView) view.findViewById(R.id.finish_tv_time);
+        EaseUserUtils.setAppUserAvatar(this, EMClient.getInstance().getCurrentUser(), userAvatar);
+        EaseUserUtils.setAppUserNick(EMClient.getInstance().getCurrentUser(), nameView);
+        showTimeView.setText(time);
         closeConfirmBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
