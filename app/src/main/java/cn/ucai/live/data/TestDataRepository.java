@@ -1,11 +1,11 @@
 package cn.ucai.live.data;
 
-import cn.ucai.live.R;
-import cn.ucai.live.data.model.LiveRoom;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import cn.ucai.live.R;
+import cn.ucai.live.data.model.LiveRoom;
 
 /**
  * Created by wei on 2016/5/30.
@@ -32,7 +32,7 @@ public class TestDataRepository {
       liveRoom.setAudienceNum(new Random().nextInt(2000) + 1);
       liveRoom.setId(liveRoomIds[i-1]);
       liveRoom.setChatroomId(chatRoomIds[i-1]);
-      liveRoom.setCover(covers[i - 1]);
+      //liveRoom.setCover(covers[i - 1]);
       liveRoom.setAnchorId(anchorIds[i-1]);
       roomList.add(liveRoom);
     }

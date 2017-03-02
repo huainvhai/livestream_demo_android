@@ -28,6 +28,7 @@ import com.hyphenate.EMChatRoomChangeListener;
 import com.hyphenate.chat.EMChatRoom;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMCursorResult;
+import com.hyphenate.easeui.utils.EaseUserUtils;
 import com.hyphenate.exceptions.HyphenateException;
 
 import java.util.ArrayList;
@@ -39,12 +40,11 @@ import cn.ucai.live.R;
 import cn.ucai.live.data.model.LiveRoom;
 import cn.ucai.live.ui.GridMarginDecoration;
 
-import static com.ucloud.player.widget.v2.UVideoView.TAG;
-
 /**
  * A simple {@link Fragment} subclass.
  */
 public class LiveListFragment extends Fragment {
+    private static final String TAG = LiveListFragment.class.getSimpleName();
     private ProgressBar pb;
     private ListView listView;
     private LiveAdapter adapter;
@@ -120,6 +120,8 @@ public class LiveListFragment extends Fragment {
                 mSrl.setRefreshing(true);
                 tvHint.setVisibility(View.VISIBLE);
                 cursor = null;
+                isFirstLoading = true;
+                chatRoomList.clear();
                 loadAndShowData();
             }
         });
@@ -243,7 +245,7 @@ public class LiveListFragment extends Fragment {
     }
 
     /**
-     * 生成测试数据
+     * 将聊天室改为直播间
      */
     public static List<LiveRoom> getLiveRoomList(List<EMChatRoom> chatRooms) {
         List<LiveRoom> roomList = new ArrayList<>();
@@ -253,7 +255,7 @@ public class LiveListFragment extends Fragment {
             liveRoom.setAudienceNum(room.getAffiliationsCount());
             liveRoom.setId(room.getId());
             liveRoom.setChatroomId(room.getId());
-            liveRoom.setCover(R.drawable.test1);
+            liveRoom.setCover(EaseUserUtils.getAppUserInfo(room.getOwner()).getAvatar());
             liveRoom.setAnchorId(room.getOwner());
             roomList.add(liveRoom);
         }
@@ -282,6 +284,7 @@ public class LiveListFragment extends Fragment {
                     final int position = holder.getAdapterPosition();
                     if (position == RecyclerView.NO_POSITION) return;
                     LiveRoom room = liveRoomList.get(position);
+                    Log.e(TAG,"room=" + room);
                     if (room.getAnchorId().equals(EMClient.getInstance().getCurrentUser())) {
                         context.startActivity(new Intent(context, StartLiveActivity.class)
                                 .putExtra("liveId", room.getId()));

@@ -32,7 +32,6 @@ import com.ucloud.live.UEasyStreaming;
 import com.ucloud.live.UStreamingProfile;
 import com.ucloud.live.widget.UAspectFrameLayout;
 
-import java.util.List;
 import java.util.Random;
 
 import butterknife.BindView;
@@ -40,8 +39,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.ucai.live.NetDao;
 import cn.ucai.live.R;
-import cn.ucai.live.data.TestDataRepository;
-import cn.ucai.live.data.model.LiveRoom;
 import cn.ucai.live.data.model.LiveSettings;
 import cn.ucai.live.utils.CommonUtils;
 import cn.ucai.live.utils.Log2FileUtil;
@@ -111,17 +108,19 @@ public class StartLiveActivity extends LiveBaseActivity
         EaseUserUtils.setAppUserNick(EMClient.getInstance().getCurrentUser(), usernameView);
         //usernameView.setText(anchorId);
         String id = getIntent().getStringExtra("liveId");
+        Log.e(TAG, "getIntent,id=" + id);
         if (id != null && !id.equals("")) {
             liveId = id;
             chatroomId = id;
-            initEnv();
         } else {
-            pd = new ProgressDialog(this);
-            pd.setTitle("创建直播");
-            pd.setMessage("正在创建直播");
-            pd.show();
-            createLive();
+            liveId = EMClient.getInstance().getCurrentUser();
+//            pd = new ProgressDialog(this);
+//            pd.setTitle("创建直播");
+//            pd.setMessage("正在创建直播");
+//            pd.show();
+//            createLive();
         }
+        initEnv();
     }
 
     public void initEnv() {
@@ -209,12 +208,15 @@ public class StartLiveActivity extends LiveBaseActivity
     void startLive() {
         //demo为了测试方便，只有指定的账号才能开启直播
         Log.e(TAG, "startLive,id=" + liveId);
-        if (liveId == null || liveId.equals("")) {
-            CommonUtils.showShortToast("获取直播数据失败");
-            Log.e(TAG, "id is null");
-            return;
+        if (chatroomId == null || chatroomId.equals("")) {
+            pd = new ProgressDialog(this);
+            pd.setTitle("创建直播");
+            pd.setMessage("正在创建直播");
+            pd.show();
+            createLive();
+        } else {
+            startLiveByChatRoom();
         }
-        startLiveByChatRoom();
         //Utils.hideKeyboard(titleEdit);
     }
 
@@ -249,16 +251,12 @@ public class StartLiveActivity extends LiveBaseActivity
                     boolean isSuccess = false;
                     pd.dismiss();
                     if (s != null) {
-//                        List<String> ids = ResultUtils.getEMResultFromJson(s, String.class);
-//                        if (ids != null && ids.size() > 0) {
-//                            isSuccess = true;
-//                            Log.e(TAG, "ids=" + ids.get(0));
-//                            initLive(ids.get(0));
-//                            startLiveByChatRoom();
-//                        }
                         String id = ResultUtils.getEMResultFromJson(s);
+                        Log.e(TAG, "createLive,id=" + id);
                         isSuccess = true;
-                        initLive(id);
+                        //initLive(id);
+                        chatroomId = id;
+                        startLiveByChatRoom();
                     }
                     if (!isSuccess) {
                         pd.dismiss();
@@ -294,6 +292,7 @@ public class StartLiveActivity extends LiveBaseActivity
         showConfirmCloseLayout();
     }
 
+
     @OnClick(R.id.img_bt_switch_voice)
     void toggleMicrophone() {
         AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
@@ -309,12 +308,13 @@ public class StartLiveActivity extends LiveBaseActivity
     private void showConfirmCloseLayout() {
         //显示封面
         coverImage.setVisibility(View.VISIBLE);
-        List<LiveRoom> liveRoomList = TestDataRepository.getLiveRoomList();
-        for (LiveRoom liveRoom : liveRoomList) {
-            if (liveRoom.getId().equals(liveId)) {
-                coverImage.setImageResource(liveRoom.getCover());
-            }
-        }
+        EaseUserUtils.setAppUserAvatar(this, EMClient.getInstance().getCurrentUser(), coverImage);
+//        List<LiveRoom> liveRoomList = TestDataRepository.getLiveRoomList();
+//        for (LiveRoom liveRoom : liveRoomList) {
+//            if (liveRoom.getId().equals(liveId)) {
+//                coverImage.setImageResource(liveRoom.getCover());
+//            }
+//        }
         View view = liveEndLayout.inflate();
         Button closeConfirmBtn = (Button) view.findViewById(R.id.live_close_confirm);
         TextView usernameView = (TextView) view.findViewById(R.id.tv_username);
