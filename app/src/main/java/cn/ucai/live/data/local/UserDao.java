@@ -8,6 +8,8 @@ import com.hyphenate.easeui.domain.User;
 import java.util.List;
 import java.util.Map;
 
+import cn.ucai.live.data.pojo.Gift;
+
 /**
  * Created by Administrator on 2017/2/28.
  */
@@ -32,6 +34,11 @@ public class UserDao {
     public static final String USER_COLUMN_NAME_AVATAR_TYPE = "m_avatar_type";
     public static final String USER_COLUMN_NAME_AVATAR_UPDATE_TIME = "m_avatar_last_update_time";
 
+    public static final String GIFT_TABLE_NAME = "t_superwechat_gift";
+    public static final String GIFT_COLUMN_ID = "m_gift_id";
+    public static final String GIFT_COLUMN_NAME = "m_gift_name";
+    public static final String GIFT_COLUMN_URL = "m_gift_url";
+    public static final String GIFT_COLUMN_PRICE = "m_gift_price";
 
     public UserDao(Context context) {
     }
@@ -121,5 +128,24 @@ public class UserDao {
      */
     public void saveAppContact(User user){
         LiveDBManager.getInstance().saveAppContact(user);
+    }
+
+    /**
+     * save gift list
+     *
+     * @param giftList
+     */
+    public void saveAppGiftList(List<Gift> giftList) {
+        LiveDBManager.getInstance().saveAppGiftList(giftList);
+    }
+
+    /**
+     * get gift list
+     *
+     * @return
+     */
+    public Map<Integer, Gift> getAppGiftList() {
+
+        return LiveDBManager.getInstance().getAppGiftList();
     }
 }
