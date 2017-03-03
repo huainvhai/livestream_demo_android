@@ -482,6 +482,12 @@ public abstract class LiveBaseActivity extends BaseActivity {
 
   @OnClick(R.id.present_image)
   void onPresentImageClick() {
+    final RoomGiftListDialog dialog =
+            RoomGiftListDialog.newInstance();
+    dialog.show(getSupportFragmentManager(), "RoomGiftListDialog");
+  }
+
+  private void sendGiftMsg() {
     User user = EaseUserUtils.getAppUserInfo(EMClient.getInstance().getCurrentUser());
     Log.e(TAG, "send present,user=" + user);
     EMMessage message = EMMessage.createSendMessage(EMMessage.Type.CMD);

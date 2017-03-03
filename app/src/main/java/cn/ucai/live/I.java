@@ -5,6 +5,8 @@ package cn.ucai.live;
  */
 
 public interface I {
+    String TYPE_GIFT = "cn.ucai.live.gift";
+
     public static interface User {
         String TABLE_NAME = "t_superwechat_user";
         String USER_NAME = "m_user_name";                    //用户账号
