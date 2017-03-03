@@ -13,7 +13,10 @@ import com.hyphenate.easeui.widget.EaseImageView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import cn.ucai.live.I;
+import cn.ucai.live.LiveHelper;
 import cn.ucai.live.R;
+import cn.ucai.live.data.pojo.Gift;
 
 /**
  * Created by wei on 2016/6/7.
@@ -26,6 +29,8 @@ public class LiveLeftGiftView extends RelativeLayout {
     TextView name;
     @BindView(R.id.gift_image)
     ImageView giftImage;
+    @BindView(R.id.giftName)
+    TextView giftName;
 
     public LiveLeftGiftView(Context context) {
         super(context);
@@ -57,5 +62,16 @@ public class LiveLeftGiftView extends RelativeLayout {
 
     public ImageView getGiftImageView() {
         return giftImage;
+    }
+
+    public void setGift(int giftId) {
+        if (giftId == 0) {
+            giftName.setText("送了一个校园之星");
+            giftImage.setImageResource(R.drawable.gift_default);
+        } else {
+            Gift gift = LiveHelper.getInstance().getAppGiftList().get(giftId);
+            EaseUserUtils.setAppUserAvatarByPath(getContext(), gift.getGurl(), giftImage, I.TYPE_GIFT);
+            giftName.setText("送了一个" + gift.getGname());
+        }
     }
 }
