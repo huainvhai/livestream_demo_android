@@ -39,6 +39,7 @@ import cn.ucai.live.data.local.LiveDBManager;
 import cn.ucai.live.data.local.UserDao;
 import cn.ucai.live.data.model.Result;
 import cn.ucai.live.data.pojo.Gift;
+import cn.ucai.live.data.pojo.Wallet;
 import cn.ucai.live.ui.activity.ChatActivity;
 import cn.ucai.live.ui.activity.MainActivity;
 import cn.ucai.live.utils.PreferenceManager;
@@ -1181,6 +1182,29 @@ public class LiveHelper {
             @Override
             public void onError(String error) {
                 Log.e(TAG, "error=" + error);
+            }
+        });
+
+        NetDao.loadChange(activity, EMClient.getInstance().getCurrentUser(), new OnCompleteListener<String>() {
+            @Override
+            public void onSuccess(String s) {
+                boolean success = false;
+                if (s != null) {
+                    Result result = ResultUtils.getResultFromJson(s, Wallet.class);
+                    if (result != null && result.isRetMsg()) {
+                        success = true;
+                        Wallet wallet = (Wallet) result.getRetData();
+                        PreferenceManager.getInstance().setCurrentuserChange(wallet.getBalance());
+                    }
+                }
+                if (!success) {
+                    PreferenceManager.getInstance().setCurrentuserChange(0);
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                PreferenceManager.getInstance().setCurrentuserChange(0);
             }
         });
     }
